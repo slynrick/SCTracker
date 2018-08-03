@@ -28,14 +28,20 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             this.ScriptInOut = new System.Windows.Forms.TabControl();
             this.tab_sc = new System.Windows.Forms.TabPage();
+            this.ParameterTable = new System.Windows.Forms.DataGridView();
+            this.ParameterType = new System.Windows.Forms.DataGridViewComboBoxColumn();
+            this.Value = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ScriptText = new System.Windows.Forms.RichTextBox();
             this.tab_tracker = new System.Windows.Forms.TabPage();
             this.TrackerOutputText = new System.Windows.Forms.RichTextBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.FileMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.OpenSCMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.binaryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.textToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.CheckOpcodesMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.AboutMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -46,6 +52,7 @@
             this.ProgressBar = new System.Windows.Forms.ToolStripProgressBar();
             this.ScriptInOut.SuspendLayout();
             this.tab_sc.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.ParameterTable)).BeginInit();
             this.tab_tracker.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.statusStrip.SuspendLayout();
@@ -64,6 +71,7 @@
             // 
             // tab_sc
             // 
+            this.tab_sc.Controls.Add(this.ParameterTable);
             this.tab_sc.Controls.Add(this.ScriptText);
             this.tab_sc.Location = new System.Drawing.Point(4, 22);
             this.tab_sc.Name = "tab_sc";
@@ -73,15 +81,48 @@
             this.tab_sc.Text = "Smart Contract Script";
             this.tab_sc.UseVisualStyleBackColor = true;
             // 
+            // ParameterTable
+            // 
+            this.ParameterTable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.ParameterTable.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.ParameterType,
+            this.Value});
+            this.ParameterTable.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.ParameterTable.EditMode = System.Windows.Forms.DataGridViewEditMode.EditOnEnter;
+            this.ParameterTable.Location = new System.Drawing.Point(3, 210);
+            this.ParameterTable.Name = "ParameterTable";
+            this.ParameterTable.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
+            this.ParameterTable.Size = new System.Drawing.Size(786, 187);
+            this.ParameterTable.TabIndex = 1;
+            // 
+            // ParameterType
+            // 
+            dataGridViewCellStyle4.NullValue = "byte[]";
+            this.ParameterType.DefaultCellStyle = dataGridViewCellStyle4;
+            this.ParameterType.DisplayStyle = System.Windows.Forms.DataGridViewComboBoxDisplayStyle.ComboBox;
+            this.ParameterType.HeaderText = "Type";
+            this.ParameterType.Items.AddRange(new object[] {
+            "byte[]",
+            "BigInteger",
+            "bool",
+            "string"});
+            this.ParameterType.Name = "ParameterType";
+            // 
+            // Value
+            // 
+            this.Value.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Value.HeaderText = "Value";
+            this.Value.Name = "Value";
+            // 
             // ScriptText
             // 
             this.ScriptText.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.ScriptText.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ScriptText.Location = new System.Drawing.Point(3, 3);
+            this.ScriptText.Location = new System.Drawing.Point(3, 6);
             this.ScriptText.Name = "ScriptText";
-            this.ScriptText.Size = new System.Drawing.Size(789, 366);
+            this.ScriptText.Size = new System.Drawing.Size(789, 198);
             this.ScriptText.TabIndex = 0;
             this.ScriptText.Text = "";
             this.ScriptText.TextChanged += new System.EventHandler(this.ScriptText_TextChanged);
@@ -133,10 +174,26 @@
             // 
             // OpenSCMenuItem
             // 
+            this.OpenSCMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.binaryToolStripMenuItem,
+            this.textToolStripMenuItem});
             this.OpenSCMenuItem.Name = "OpenSCMenuItem";
             this.OpenSCMenuItem.Size = new System.Drawing.Size(136, 22);
             this.OpenSCMenuItem.Text = "Open Script";
-            this.OpenSCMenuItem.Click += new System.EventHandler(this.OpenSCMenuItem_Click);
+            // 
+            // binaryToolStripMenuItem
+            // 
+            this.binaryToolStripMenuItem.Name = "binaryToolStripMenuItem";
+            this.binaryToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
+            this.binaryToolStripMenuItem.Text = "Binary";
+            this.binaryToolStripMenuItem.Click += new System.EventHandler(this.binaryToolStripMenuItem_Click);
+            // 
+            // textToolStripMenuItem
+            // 
+            this.textToolStripMenuItem.Name = "textToolStripMenuItem";
+            this.textToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
+            this.textToolStripMenuItem.Text = "Text";
+            this.textToolStripMenuItem.Click += new System.EventHandler(this.textToolStripMenuItem_Click);
             // 
             // ToolsMenuItem
             // 
@@ -148,6 +205,7 @@
             // 
             // CheckOpcodesMenuItem
             // 
+            this.CheckOpcodesMenuItem.Enabled = false;
             this.CheckOpcodesMenuItem.Name = "CheckOpcodesMenuItem";
             this.CheckOpcodesMenuItem.Size = new System.Drawing.Size(180, 22);
             this.CheckOpcodesMenuItem.Text = "Check Opcodes";
@@ -166,6 +224,7 @@
             this.HelpMenuItem.Name = "HelpMenuItem";
             this.HelpMenuItem.Size = new System.Drawing.Size(99, 22);
             this.HelpMenuItem.Text = "Help";
+            this.HelpMenuItem.Click += new System.EventHandler(this.HelpMenuItem_Click);
             // 
             // statusStrip
             // 
@@ -182,7 +241,7 @@
             // OpenedFile
             // 
             this.OpenedFile.Name = "OpenedFile";
-            this.OpenedFile.Size = new System.Drawing.Size(631, 17);
+            this.OpenedFile.Size = new System.Drawing.Size(785, 17);
             this.OpenedFile.Spring = true;
             this.OpenedFile.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
@@ -191,11 +250,13 @@
             this.ProgressLabel.Name = "ProgressLabel";
             this.ProgressLabel.Size = new System.Drawing.Size(52, 17);
             this.ProgressLabel.Text = "Progress";
+            this.ProgressLabel.Visible = false;
             // 
             // ProgressBar
             // 
             this.ProgressBar.Name = "ProgressBar";
             this.ProgressBar.Size = new System.Drawing.Size(100, 16);
+            this.ProgressBar.Visible = false;
             // 
             // MainWindow
             // 
@@ -211,6 +272,7 @@
             this.Text = "SCTracker";
             this.ScriptInOut.ResumeLayout(false);
             this.tab_sc.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.ParameterTable)).EndInit();
             this.tab_tracker.ResumeLayout(false);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
@@ -239,5 +301,10 @@
         private System.Windows.Forms.ToolStripStatusLabel OpenedFile;
         private System.Windows.Forms.ToolStripMenuItem ToolsMenuItem;
         private System.Windows.Forms.ToolStripMenuItem CheckOpcodesMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem binaryToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem textToolStripMenuItem;
+        private System.Windows.Forms.DataGridView ParameterTable;
+        private System.Windows.Forms.DataGridViewComboBoxColumn ParameterType;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Value;
     }
 }

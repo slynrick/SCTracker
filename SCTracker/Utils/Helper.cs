@@ -15,13 +15,7 @@ namespace SCTracker.Utils
             Error
         };
 
-        public static byte[] HexToBytes(this String s)
-        {
-            uint num = uint.Parse(s, System.Globalization.NumberStyles.AllowHexSpecifier);
-
-            return BitConverter.GetBytes(num);
-        }
-
+       
         public static bool IsHex(this String s)
         {
             return Regex.IsMatch(s, @"\A\b[0-9a-fA-F]+\b\Z");

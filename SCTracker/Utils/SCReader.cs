@@ -5,23 +5,46 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Neo;
+
 namespace SCTracker.Utils
 {
     class SCReader
     {
         private String SC_FileName { get; set; }
+        private Boolean SC_IsBin { get; set; }
 
-        public SCReader(String FileName)
+        public SCReader(String FileName, Boolean IsBin)
         {
             SC_FileName = FileName;
+            SC_IsBin = IsBin;
         }
 
         public String ReadAllScript()
-        {
-            byte[] data = new byte[0];
+        { 
+            if(SC_IsBin)
+            {
+                byte[] data = new byte[0];
+                try
+                {
+                    data = File.ReadAllBytes(SC_FileName);
+                }
+                catch (FileNotFoundException e)
+                {
+                    return "File not found : " + e.FileName;
+                }
+                catch (IOException e)
+                {
+                    return e.Message;
+                }
+                return data.ToHexString();
+            }
+
+
+            String text = "";
             try
             {
-                data = File.ReadAllBytes(SC_FileName);
+                text = File.ReadAllText(SC_FileName);
             }
             catch (FileNotFoundException e)
             {
@@ -31,7 +54,10 @@ namespace SCTracker.Utils
             {
                 return e.Message;
             }
-            return Encoding.UTF8.GetString(data);
+
+            return text;
+
+
         }
 
         // Method that overrides the base class (System.Object) implementation.
