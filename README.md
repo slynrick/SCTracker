@@ -13,4 +13,5 @@
 ## What we want to do
 
  - [ ] Calculate the Gas cost of the invocation
+ - [ ] Show the stacks values
 
