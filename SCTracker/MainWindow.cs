@@ -81,7 +81,7 @@ namespace SCTracker
         {
             // set it reaonly to not change the script
             ScriptText.ReadOnly = true;
-            ParameterTable.ClearSelection();
+            ParameterTable.Rows[0].Selected = true;
 
             new Thread(() => {
                 this.Invoke((MethodInvoker)delegate ()

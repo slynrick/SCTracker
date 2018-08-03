@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             this.ScriptInOut = new System.Windows.Forms.TabControl();
             this.tab_sc = new System.Windows.Forms.TabPage();
             this.ParameterTable = new System.Windows.Forms.DataGridView();
@@ -88,7 +88,6 @@
             this.ParameterType,
             this.Value});
             this.ParameterTable.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.ParameterTable.EditMode = System.Windows.Forms.DataGridViewEditMode.EditOnEnter;
             this.ParameterTable.Location = new System.Drawing.Point(3, 210);
             this.ParameterTable.Name = "ParameterTable";
             this.ParameterTable.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
@@ -97,8 +96,8 @@
             // 
             // ParameterType
             // 
-            dataGridViewCellStyle4.NullValue = "byte[]";
-            this.ParameterType.DefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle5.NullValue = "byte[]";
+            this.ParameterType.DefaultCellStyle = dataGridViewCellStyle5;
             this.ParameterType.DisplayStyle = System.Windows.Forms.DataGridViewComboBoxDisplayStyle.ComboBox;
             this.ParameterType.HeaderText = "Type";
             this.ParameterType.Items.AddRange(new object[] {
