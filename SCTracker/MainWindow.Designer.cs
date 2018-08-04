@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             this.ScriptInOut = new System.Windows.Forms.TabControl();
             this.tab_sc = new System.Windows.Forms.TabPage();
             this.ParameterTable = new System.Windows.Forms.DataGridView();
@@ -96,8 +96,8 @@
             // 
             // ParameterType
             // 
-            dataGridViewCellStyle5.NullValue = "byte[]";
-            this.ParameterType.DefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle1.NullValue = "byte[]";
+            this.ParameterType.DefaultCellStyle = dataGridViewCellStyle1;
             this.ParameterType.DisplayStyle = System.Windows.Forms.DataGridViewComboBoxDisplayStyle.ComboBox;
             this.ParameterType.HeaderText = "Type";
             this.ParameterType.Items.AddRange(new object[] {
@@ -143,7 +143,6 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.TrackerOutputText.BackColor = System.Drawing.SystemColors.ControlLightLight;
-            this.TrackerOutputText.ForeColor = System.Drawing.SystemColors.HotTrack;
             this.TrackerOutputText.Location = new System.Drawing.Point(3, 3);
             this.TrackerOutputText.Name = "TrackerOutputText";
             this.TrackerOutputText.ReadOnly = true;
@@ -206,7 +205,7 @@
             // 
             this.CheckOpcodesMenuItem.Enabled = false;
             this.CheckOpcodesMenuItem.Name = "CheckOpcodesMenuItem";
-            this.CheckOpcodesMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.CheckOpcodesMenuItem.Size = new System.Drawing.Size(157, 22);
             this.CheckOpcodesMenuItem.Text = "Check Opcodes";
             this.CheckOpcodesMenuItem.Click += new System.EventHandler(this.CheckOpcodesMenuItem_Click);
             // 

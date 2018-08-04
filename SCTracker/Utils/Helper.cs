@@ -36,15 +36,35 @@ namespace SCTracker.Utils
             }
         }
 
+        public static System.Drawing.Color GetMessageClassColor(this MessageClass Class)
+        {
+            switch (Class)
+            {
+                case MessageClass.Information:
+                    return System.Drawing.Color.DarkBlue;
+                case MessageClass.Warning:
+                    return System.Drawing.Color.DarkGoldenrod;
+                case MessageClass.Error:
+                    return System.Drawing.Color.Red;
+                default:
+                    return System.Drawing.Color.DarkGray;
+            }
+        }
+
         public static String GenerateTimeStampFormat(this DateTime DT)
         {
             return "[" + DT.ToString("yyyy-MM-dd HH:mm:ss.ffff") + "]";
         }
 
-        public static String CreateLogMessage(this String LogMessage, MessageClass Class)
+        public static void CreateLogMessage(this System.Windows.Forms.RichTextBox box, String LogMessage, MessageClass Class)
         {
             String preffix = DateTime.Now.GenerateTimeStampFormat() + Class.GenerateString() + ": ";
-            return preffix + LogMessage;
+            LogMessage = preffix + LogMessage;
+
+            box.SelectionStart = box.Text.Length;
+            box.SelectionColor = Class.GetMessageClassColor();
+            box.AppendText(LogMessage);
+            box.SelectionColor = box.ForeColor;
         }
     }
 }
