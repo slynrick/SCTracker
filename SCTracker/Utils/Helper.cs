@@ -1,8 +1,13 @@
-﻿using System;
+﻿using Neo;
+using Neo.VM;
+using SCTracker.Engines;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace SCTracker.Utils
 {
@@ -12,7 +17,8 @@ namespace SCTracker.Utils
         {
             Information,
             Warning,
-            Error
+            Error,
+            Success
         };
 
        
@@ -31,6 +37,8 @@ namespace SCTracker.Utils
                     return "[WARN]";
                 case MessageClass.Error:
                     return "[ERRO]";
+                case MessageClass.Success:
+                    return "[SUCC]";
                 default:
                     return "[UNKW]";
             }
@@ -46,6 +54,8 @@ namespace SCTracker.Utils
                     return System.Drawing.Color.DarkGoldenrod;
                 case MessageClass.Error:
                     return System.Drawing.Color.Red;
+                case MessageClass.Success:
+                    return System.Drawing.Color.ForestGreen;
                 default:
                     return System.Drawing.Color.DarkGray;
             }
@@ -56,7 +66,7 @@ namespace SCTracker.Utils
             return "[" + DT.ToString("yyyy-MM-dd HH:mm:ss.ffff") + "]";
         }
 
-        public static void CreateLogMessage(this System.Windows.Forms.RichTextBox box, String LogMessage, MessageClass Class)
+        public static void CreateLogMessage(this RichTextBox box, String LogMessage, MessageClass Class)
         {
             String preffix = DateTime.Now.GenerateTimeStampFormat() + Class.GenerateString() + ": ";
             LogMessage = preffix + LogMessage;
@@ -65,6 +75,35 @@ namespace SCTracker.Utils
             box.SelectionColor = Class.GetMessageClassColor();
             box.AppendText(LogMessage);
             box.SelectionColor = box.ForeColor;
+        }
+
+        public static ScriptBuilder GetScriptBuilder(this DataGridView ParameterTable, RichTextBox Logger, SCTrackerExecutionEngine engine)
+        {
+            ScriptBuilder sb = new ScriptBuilder();
+            for (int i = ParameterTable.Rows.Count - 2; i >= 0; --i)
+            {
+                string type = ParameterTable.Rows[i].Cells[0].Value.ToString();
+                string value = ParameterTable.Rows[i].Cells[1].Value.ToString();
+                switch (type)
+                {
+                    case "byte[]":
+                        sb.EmitPush(value.HexToBytes());
+                        break;
+                    case "BigInteger":
+                        sb.EmitPush(BigInteger.Parse(value));
+                        break;
+                    case "bool":
+                        sb.EmitPush(Convert.ToBoolean(value));
+                        break;
+                    case "string":
+                        sb.EmitPush(value);
+                        break;
+                    default:
+                        break;
+                }
+                Logger.CreateLogMessage(($"[Contract:0x{engine.GetScriptHash()}] Add parameter {type} = {value}  \n"), Utils.Helper.MessageClass.Information);
+            }
+            return sb;
         }
     }
 }

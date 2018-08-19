@@ -8,13 +8,15 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Numerics;
+using System.Globalization;
 
 using SCTracker.Utils;
+using SCTracker.Engines;
+
 using Neo;
 using Neo.VM;
 using Neo.Cryptography;
-using System.Numerics;
-using System.Globalization;
 
 namespace SCTracker
 {
@@ -51,7 +53,7 @@ namespace SCTracker
             ScriptText.Text = x.ReadAllScript();
             OpenedFile.Text = x.ToString();
 
-            CheckOpcodesMenuItem.Enabled = true;
+            ExecutionEngineMenuItem.Enabled = true;
         }
 
         private void binaryToolStripMenuItem_Click(object sender, EventArgs e)
@@ -84,129 +86,50 @@ namespace SCTracker
             ScriptText.ReadOnly = true;
             ParameterTable.Rows[0].Selected = true;
 
-            new Thread(() => {
-                this.Invoke((MethodInvoker)delegate ()
-                {
-                    TrackerOutputText.CreateLogMessage(($"Running CheckOpcodes with Thread {Thread.CurrentThread.ManagedThreadId.ToString()} \n"), Utils.Helper.MessageClass.Information);
+            TrackerOutputText.CreateLogMessage(($"Running CheckOpcodes with Thread {Thread.CurrentThread.ManagedThreadId.ToString()} \n"), Utils.Helper.MessageClass.Information);
 
-                    var engine = new ExecutionEngine(null, Crypto.Default);
-                    engine.LoadScript(ScriptText.Text.HexToBytes()); // loads avm
+            var engine = new SCTrackerExecutionEngine(TrackerOutputText, null, Crypto.Default);
+            engine.SCTrackerLoadScript(ScriptText.Text.HexToBytes()); // loads avm
 
-                    string scripthash = engine.CurrentContext.ScriptHash.ToHexString();
-                    TrackerOutputText.CreateLogMessage(($"Contract Scripthash: 0x{scripthash} \n"), Utils.Helper.MessageClass.Information);
+            ScriptBuilder sb = ParameterTable.GetScriptBuilder(TrackerOutputText, engine);
+            engine.LoadScript(sb.ToArray());
+            TrackerOutputText.CreateLogMessage(($"[Contract:0x{engine.GetScriptHash()}] Added parameters as hex = {sb.ToArray().ToHexString()}  \n"), Utils.Helper.MessageClass.Information);
 
+            TrackerOutputText.CreateLogMessage("\tTracking:\n", Utils.Helper.MessageClass.Information);
+            engine.SCTrackerExecute(); // start execution
 
-                    using (ScriptBuilder sb = new ScriptBuilder()) // loading parameter, from the last to the first
-                    {
-                        for (int i = ParameterTable.Rows.Count - 2; i >= 0; --i)
-                        {
-                            string type = ParameterTable.Rows[i].Cells[0].Value.ToString();
-                            string value = ParameterTable.Rows[i].Cells[1].Value.ToString();
-                            switch (type)
-                            {
-                                case "byte[]":
-                                    sb.EmitPush(value.HexToBytes());
-                                    break;
-                                case "BigInteger":
-                                    sb.EmitPush(BigInteger.Parse(value));
-                                    break;
-                                case "bool":
-                                    sb.EmitPush(Convert.ToBoolean(value));
-                                    break;
-                                case "string":
-                                    sb.EmitPush(value);
-                                    break;
-                                default:
-                                    break;
-                            }
-                            TrackerOutputText.CreateLogMessage(($"[Contract:0x{scripthash}] Add parameter {type} = {value}  \n"), Utils.Helper.MessageClass.Information);
-                        }
-                        engine.LoadScript(sb.ToArray());
-                        TrackerOutputText.CreateLogMessage(($"[Contract:0x{scripthash}] Added parameters as hex = {sb.ToArray().ToHexString()}  \n"), Utils.Helper.MessageClass.Information);
-                    }
+            string state = engine.State == VMState.HALT ? "OK" : "FAIL";
+            string stateMessage = $"[Contract:0x{engine.GetScriptHash()}] Result = {state} \n";
+            Utils.Helper.MessageClass mClass = Utils.Helper.MessageClass.Information;
+            OpCode currentOpCode = OpCode.NOP;
+            string result = "No result";
+            if (engine.State == VMState.HALT)
+            {
+                result = engine.ResultStack.Peek().ToParameter().ToString();
+                mClass = Utils.Helper.MessageClass.Success;
+            }
+            else if (engine.State == VMState.FAULT)
+            {
+                int pos = engine.InvocationStack.Peek().InstructionPointer * 2 - 2;
+                ScriptText.SelectionStart = pos;
+                ScriptText.SelectionLength = 2;
+                ScriptText.SelectionColor = Color.Red;
+                mClass = Utils.Helper.MessageClass.Error;
+            }
+            else
+            {
+                int pos = engine.InvocationStack.Peek().InstructionPointer * 2 - 2;
+                ScriptText.SelectionStart = pos;
+                ScriptText.SelectionLength = 2;
+                ScriptText.SelectionColor = Color.DarkGoldenrod;
 
-                    engine.Execute(); // start execution
-
-                    string state = engine.State == VMState.HALT ? "OK" : "FAIL";
-                    string stateMessage = $"[Contract:0x{scripthash}] Result = {state} \n";
-                    Utils.Helper.MessageClass mClass = Utils.Helper.MessageClass.Information;
-                    OpCode currentOpCode = OpCode.NOP;
-                    string result = "";
-                    if ( engine.State == VMState.HALT )
-                    {
-                        result = engine.EvaluationStack.Peek().ToParameter().ToString();
-                        mClass = Utils.Helper.MessageClass.Information;
-                    }
-                    else if (engine.State == VMState.FAULT )
-                    {
-                        int pos = engine.InvocationStack.Peek().InstructionPointer * 2 - 2;
-                        ScriptText.SelectionStart = pos;
-                        ScriptText.SelectionLength = 2;
-                        ScriptText.SelectionColor = Color.Red;
-
-                        currentOpCode = (OpCode)Convert.ToByte(ScriptText.Text.Substring(pos, 2), 16);
-                        mClass = Utils.Helper.MessageClass.Error;
-
-                        result = currentOpCode.ToString() + " at position " + pos / 2 + "\n";
-                        result += "\tTracking: \n";
-                        for (int i = 0; i <= pos; i += 2)
-                        {
-                            OpCode PreviousOpCode = (OpCode)Convert.ToByte(ScriptText.Text.Substring(i, 2), 16);
-                            result += "\t\t" + ScriptText.Text.Substring(i, 2) + " -> " + PreviousOpCode.ToString();
-                            if (PreviousOpCode >= OpCode.PUSHBYTES1 && 
-                                PreviousOpCode <= OpCode.PUSHBYTES75)
-                            {
-                                int initialPos = i + 2;
-                                int len = (int)PreviousOpCode * 2;
-                                result += ScriptText.Text.Substring(initialPos, len).HexToBytes().ToString();
-                                i += len;
-                            }
-                            else if( PreviousOpCode >= OpCode.JMP &&
-                                     PreviousOpCode <= OpCode.JMPIFNOT )
-                            {
-                                int initialPos = i + 2;
-                                result += ScriptText.Text.Substring(initialPos, 4).HexToBytes().ToString();
-                                int offset = (int)BigInteger.Parse(ScriptText.Text.Substring(initialPos, 4), NumberStyles.AllowHexSpecifier);
-                                i = i + (offset * 2) - (3 * 2);
-                            }
-                            else if (PreviousOpCode == OpCode.CALL)
-                            {
-                                int initialPos = i + 2;
-                                result += ScriptText.Text.Substring(initialPos, 4).HexToBytes().ToString();
-                                i += 2 * 2;
-                            }
-                            else if (PreviousOpCode == OpCode.APPCALL || PreviousOpCode == OpCode.TAILCALL)
-                            {
-                                int initialPos = i + 2;
-                                result += ScriptText.Text.Substring(initialPos, 60).HexToBytes().ToString();
-                                i += 30 * 2;
-                            }
-                            else if (PreviousOpCode == OpCode.SYSCALL)
-                            {
-                                int initialPos = i + 2;
-                                result += ScriptText.Text.Substring(initialPos, 504).HexToBytes().ToString();
-                                i += 252 * 2;
-                            }
-                            
-                            result += "\n";
-                        }
-                    }
-                    else
-                    {
-                        int pos = engine.InvocationStack.Peek().InstructionPointer * 2 - 2;
-                        ScriptText.SelectionStart = pos;
-                        ScriptText.SelectionLength = 2;
-                        ScriptText.SelectionColor = Color.DarkGoldenrod;
-
-                        currentOpCode = (OpCode)Convert.ToByte(ScriptText.Text.Substring(pos, 2), 16);
-                        result = currentOpCode.ToString() + " at position " + pos/2;
-                        mClass = Utils.Helper.MessageClass.Warning;
-                    }
-                    TrackerOutputText.CreateLogMessage(($"[Contract:0x{scripthash}] Result = {result} \n"), mClass);
-                    TrackerOutputText.CreateLogMessage(stateMessage, mClass);
-                    TrackerOutputText.CreateLogMessage("CheckOpcodes Finishes \n", Utils.Helper.MessageClass.Information);
-                });
-            }).Start();
+                currentOpCode = (OpCode)Convert.ToByte(ScriptText.Text.Substring(pos, 2), 16);
+                result = currentOpCode.ToString() + " at position " + pos / 2;
+                mClass = Utils.Helper.MessageClass.Warning;
+            }
+            TrackerOutputText.CreateLogMessage(($"[Contract:0x{engine.GetScriptHash()}] Result = {result} \n"), mClass);
+            TrackerOutputText.CreateLogMessage(stateMessage, mClass);
+            TrackerOutputText.CreateLogMessage("CheckOpcodes Finishes \n", Utils.Helper.MessageClass.Information);
 
             // put it back to be changed
             ScriptText.ReadOnly = false;
